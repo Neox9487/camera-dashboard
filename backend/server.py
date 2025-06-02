@@ -27,6 +27,7 @@ class Server:
     self.logger = logging.getLogger("Server")
     self.fh = logging.FileHandler("server.log")
     self.fh.setLevel(LOGGING_LEVEL)
+    self.fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
     self.logger.addHandler(self.fh)
 
     self.log(f"Server initialized with configuration: Host: {self.host}, Port: {self.port}, API Prefix: {self.api_prefix}")
