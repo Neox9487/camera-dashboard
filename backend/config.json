@@ -1,13 +1,15 @@
 {
   "server": {
     "host": "localhost",
-    "port": 1000,
+    "port": 8000,
     "api_prefix": "/api",
+    "ws_prefix": "/ws",
     "logging": {
       "info-file": "server-info.log",
       "error-file": "server-error.log",
       "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    }
+    },
+    "image_send_freq": 0.01
   },
   "database": {
     "host": "localhost",

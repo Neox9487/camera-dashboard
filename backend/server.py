@@ -1,7 +1,12 @@
-from configs import SERVER_HOST, SERVER_PORT, API_PREFIX, LOGGING_ERROR_FILE, LOGGING_INFO_FILE, LOGGING_FORMAT
-from fastapi import FastAPI
+from configs import SERVER_HOST, SERVER_PORT, API_PREFIX, WS_PREFIX, LOGGING_ERROR_FILE, LOGGING_INFO_FILE, LOGGING_FORMAT, IMAGE_SEND_FREQ
+from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+
+import asyncio
 import logging
+import cv2 as cv
+
+from helpers import CameraManager
 
 class Server:
   def __init__(self):
@@ -16,6 +21,7 @@ class Server:
     self.host = SERVER_HOST
     self.port = SERVER_PORT
     self.api_prefix = API_PREFIX
+    self.ws_prefix = WS_PREFIX
 
     logging.basicConfig(
       filemode='a',
@@ -39,6 +45,8 @@ class Server:
 
     self.log_info(f"Server initialized with configuration: Host: {self.host}, Port: {self.port}, API Prefix: {self.api_prefix}")
 
+    self.camera_manager = CameraManager()
+
     # APIs ------
 
     @self.app.get(f"/")
@@ -57,17 +65,40 @@ class Server:
     # Update camera settings
       self.log_info(f"Updating settings for camera {id} with data: {settings}")
 
-    @self.app.websocket(f"{self.api_prefix}/camera/{id}/ws")
-    # Send camera images and target points via WebSocket
-    async def camera_websocket(websocket, id: int):
-      pass
+    @self.app.websocket(f"/{self.ws_prefix}/camera/{id}")
+    # Send camera frame via WebSocket
+    async def camera_websocket(websocket: WebSocket, id: int):
+      await websocket.accept()
+      await self.send_frame(websocket, id)
 
     # APIs ------
+
+  async def send_frame(self, websocket: WebSocket, id: int):
+    camera = self.camera_manager.get_camera(id)
+    try:
+      while True:
+        frame = camera.get_frame()
+        ret, jpeg_frame = cv.imencode(".jpg", frame)
+
+        if not ret:
+          self.log_error("Failed to encode frame")
+          raise RuntimeError("Failed to encode frame")
+        
+        jpeg_bytes = jpeg_frame.tobytes()
+
+        await websocket.send_bytes(jpeg_bytes)
+        await asyncio.sleep(IMAGE_SEND_FREQ)
+
+    except Exception as e:
+      self.log_error(f"Error: {e}")
+
+    finally:
+      camera.release
 
   def run(self):
     import uvicorn
     self.log_info(f"Server running at http://{self.host}:{self.port}{self.api_prefix}")
-    uvicorn.run(self.app, host=self.host, port=self.port, log_level=LOGGING_LEVEL.lower())
+    uvicorn.run(self.app, host=self.host, port=self.port)
 
   def log_info(self, message: str):
     self.info_logger.info(message)

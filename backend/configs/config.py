@@ -1,4 +1,4 @@
-from module import Json
+from modules import Json
 
 from os.path import isfile
 
@@ -7,11 +7,13 @@ CONFIG_MODULE = {
     "host": "localhost",
     "port": 8000,
     "api_prefix": "/api",
+    "ws_prefix": "/ws",
     "logging": {
       "info-file": "server-info.log",
       "error-file": "server-error.log",
       "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    }
+    },
+    "image_send_freq": 0.01
   },
   "database": {
     "host": "localhost",
@@ -36,6 +38,8 @@ except Exception as e:
 SERVER_HOST = CONFIG_MODULE["server"]["host"]
 SERVER_PORT = CONFIG_MODULE["server"]["port"]
 API_PREFIX = CONFIG_MODULE["server"]["api_prefix"]
+WS_PREFIX = CONFIG_MODULE["server"]["ws_prefix"]
+IMAGE_SEND_FREQ = CONFIG_MODULE["server"]["image_send_freq"]
 
 LOGGING_INFO_FILE = CONFIG_MODULE["server"]["logging"]["info-file"]
 LOGGING_ERROR_FILE = CONFIG_MODULE["server"]["logging"]["error-file"] 
