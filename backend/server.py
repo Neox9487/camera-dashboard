@@ -25,7 +25,7 @@ class Server:
     )
     
     self.logger = logging.getLogger("Server")
-    self.fh = logging.FileHandler("server.log")
+    self.fh = logging.FileHandler("server-info.log")
     self.fh.setLevel(LOGGING_LEVEL)
     self.fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
     self.logger.addHandler(self.fh)
