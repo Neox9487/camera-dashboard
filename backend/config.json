@@ -4,7 +4,8 @@
     "port": 1000,
     "api_prefix": "/api",
     "logging": {
-      "level": "INFO",
+      "info-file": "server-info.log",
+      "error-file": "server-error.log",
       "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     }
   },

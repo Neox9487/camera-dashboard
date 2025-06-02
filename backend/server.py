@@ -1,4 +1,4 @@
-from configs import SERVER_HOST, SERVER_PORT, API_PREFIX, LOGGING_LEVEL, LOGGING_FORMAT
+from configs import SERVER_HOST, SERVER_PORT, API_PREFIX, LOGGING_ERROR_FILE, LOGGING_INFO_FILE, LOGGING_FORMAT
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
@@ -19,25 +19,27 @@ class Server:
 
     logging.basicConfig(
       filemode='a',
-      level=LOGGING_LEVEL,
+      level=logging.INFO,
       format=LOGGING_FORMAT,
       datefmt="%Y-%m-%d %H:%M:%S",
     )
     
     self.info_logger = logging.getLogger("ServerInfo")
-    self.info_fh = logging.FileHandler("server-info.log")
+    self.info_fh = logging.FileHandler(LOGGING_INFO_FILE)
     self.info_fh.setLevel(logging.INFO)
     self.info_fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
     self.info_logger.addHandler(self.info_fh)
 
     # Error logger
     self.error_logger = logging.getLogger("ServerError")
-    self.error_fh = logging.FileHandler("server-error.log")
+    self.error_fh = logging.FileHandler(LOGGING_ERROR_FILE)
     self.error_fh.setLevel(logging.ERROR)
     self.error_fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
     self.error_logger.addHandler(self.error_fh)
 
     self.log_info(f"Server initialized with configuration: Host: {self.host}, Port: {self.port}, API Prefix: {self.api_prefix}")
+
+    # APIs ------
 
     @self.app.get(f"/")
     def root():
@@ -59,6 +61,8 @@ class Server:
     # Send camera images and target points via WebSocket
     async def camera_websocket(websocket, id: int):
       pass
+
+    # APIs ------
 
   def run(self):
     import uvicorn

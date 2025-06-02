@@ -8,7 +8,8 @@ CONFIG_MODULE = {
     "port": 8000,
     "api_prefix": "/api",
     "logging": {
-      "level": "INFO",
+      "info-file": "server-info.log",
+      "error-file": "server-error.log",
       "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     }
   },
@@ -36,7 +37,8 @@ SERVER_HOST = CONFIG_MODULE["server"]["host"]
 SERVER_PORT = CONFIG_MODULE["server"]["port"]
 API_PREFIX = CONFIG_MODULE["server"]["api_prefix"]
 
-LOGGING_LEVEL = CONFIG_MODULE["server"]["logging"]["level"]
+LOGGING_INFO_FILE = CONFIG_MODULE["server"]["logging"]["info-file"]
+LOGGING_ERROR_FILE = CONFIG_MODULE["server"]["logging"]["error-file"] 
 LOGGING_FORMAT = CONFIG_MODULE["server"]["logging"]["format"]
 
 DB_HOST = CONFIG_MODULE["database"]["host"]
