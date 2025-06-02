@@ -24,29 +24,36 @@ class Server:
       datefmt="%Y-%m-%d %H:%M:%S",
     )
     
-    self.logger = logging.getLogger("Server")
-    self.fh = logging.FileHandler("server-info.log")
-    self.fh.setLevel(LOGGING_LEVEL)
-    self.fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
-    self.logger.addHandler(self.fh)
+    self.info_logger = logging.getLogger("ServerInfo")
+    self.info_fh = logging.FileHandler("server-info.log")
+    self.info_fh.setLevel(logging.INFO)
+    self.info_fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
+    self.info_logger.addHandler(self.info_fh)
 
-    self.log(f"Server initialized with configuration: Host: {self.host}, Port: {self.port}, API Prefix: {self.api_prefix}")
+    # Error logger
+    self.error_logger = logging.getLogger("ServerError")
+    self.error_fh = logging.FileHandler("server-error.log")
+    self.error_fh.setLevel(logging.ERROR)
+    self.error_fh.setFormatter(logging.Formatter(LOGGING_FORMAT, datefmt="%Y-%m-%d %H:%M:%S"))
+    self.error_logger.addHandler(self.error_fh)
+
+    self.log_info(f"Server initialized with configuration: Host: {self.host}, Port: {self.port}, API Prefix: {self.api_prefix}")
 
     @self.app.get(f"/")
     def root():
     # Root
-      self.log("Root endpoint accessed")
+      self.log_info("Root endpoint accessed")
       return {"message": "Hello, you got wrong way ヽ(･∀･)ﾉ"}
     
     @self.app.get(f"{self.api_prefix}/camera/{id}/settings")
     def get_camera_settings(id: int):
     # Get camera settings
-      self.log(f"Getting settings for camera {id}")
+      self.log_info(f"Getting settings for camera {id}")
 
     @self.app.put(f"{self.api_prefix}/camera/{id}/settings")
     def update_camera_settings(id: int, settings: dict):
     # Update camera settings
-      self.log(f"Updating settings for camera {id} with data: {settings}")
+      self.log_info(f"Updating settings for camera {id} with data: {settings}")
 
     @self.app.websocket(f"{self.api_prefix}/camera/{id}/ws")
     # Send camera images and target points via WebSocket
@@ -55,10 +62,14 @@ class Server:
 
   def run(self):
     import uvicorn
-    self.log(f"Server running at http://{self.host}:{self.port}{self.api_prefix}")
+    self.log_info(f"Server running at http://{self.host}:{self.port}{self.api_prefix}")
     uvicorn.run(self.app, host=self.host, port=self.port, log_level=LOGGING_LEVEL.lower())
 
-  def log(self, message: str):
-    self.logger.info(message)
-    self.fh.flush()
+  def log_info(self, message: str):
+    self.info_logger.info(message)
+    self.info_fh.flush()
+
+  def log_error(self, message: str):
+    self.error_logger.error(message)
+    self.error_fh.flush()
 
